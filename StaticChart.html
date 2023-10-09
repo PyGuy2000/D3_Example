@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+<div id="chart"></div>
+<script>
+    // Simplified mock data
+    var data = [{"date": "2023-01-01", "value": 53}, {"date": "2023-01-02", "value": 65}];
+
+    var margin = {top: 20, right: 20, bottom: 30, left: 50},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    var parseDate = d3.timeParse("%Y-%m-%d");
+
+    data.forEach(function(d) {
+        d.date = parseDate(d.date);
+        d.value = +d.value;
+    });
+
+    var x = d3.scaleTime().range([0, width]).domain(d3.extent(data, function(d) { return d.date; }));
+    var y = d3.scaleLinear().range([height, 0]).domain([0, d3.max(data, function(d) { return d.value; })]);
+
+    var valueline = d3.line()
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.value); });
+
+    var svg = d3.select("#chart")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Add the X Axis
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    // Add the Y Axis
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    // Add the valueline path
+    svg.append("path")
+        .data([data])
+        .attr("d", valueline)
+        .attr("stroke", "blue")
+        .attr("stroke-width", 2)
+        .attr("fill", "none");
+
+</script>
+</body>
+</html>
